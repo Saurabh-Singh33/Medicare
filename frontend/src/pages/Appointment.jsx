@@ -5,34 +5,60 @@ import { assets } from '../assets/assets'
 
 const Appointment = () => {
   const { docId } = useParams();
-  const { doctors,currencySymbol } = useContext(AppContext)
+  const { doctors, currencySymbol } = useContext(AppContext)
+  const daysOfWeek = ['SUN' , 'MON' , 'TUE' , 'WED','THU' , 'FRI' , 'SAT']
 
   const [docInfo, setDocInfo] = useState(null)
-  const[docSlots ,setDocSlots] = useState([])
-  const [slotIndex , setSlotIndex] = useEffect(0)
-  const [slotTime,setSlotTime] = useState('');
+  const [docSlots, setDocSlots] = useState([])
+  const [slotIndex, setSlotIndex] = useState(0)  // Fixed: changed from useEffect to useState
+  const [slotTime, setSlotTime] = useState('');
 
   const fetchDocInfo = async () => {
     const docInfo = doctors.find(doc => doc._id === docId)
     setDocInfo(docInfo)
-     
   }
 
-  const getAvailableSlots = async () =>{
+  const getAvailableSlots = async () => {
+  //  if (!docInfo) return; // Add null check
+    
     setDocSlots([])
 
     //getting current date
     let today = new Date()
 
-    for(let i=0;i<7,i++){
+    for (let i = 0; i < 7; i++) {
       //getting date with index
-      let currentDate =new Date(today)
-      currentDate.setDate(today.getDate()+i)
+      let currentDate = new Date(today)
+      currentDate.setDate(today.getDate() + i)
 
       // Setting end time of date with index
       let endTime = new Date()
-      endTime.setDate(today.getDate()+1)
-      endTime.setHours(21,0,0,0)
+      endTime.setDate(today.getDate() + i)
+      endTime.setHours(21, 0, 0, 0)
+
+      //setting hours 
+      if (today.getDate() === currentDate.getDate()) {
+        currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
+        currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
+      } else {
+        currentDate.setHours(10)
+        currentDate.setMinutes(0)
+      }
+      
+      let timeSlots = []
+      while (currentDate < endTime) {
+        let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+        //Add slot to array 
+        timeSlots.push({
+          datetime: new Date(currentDate),
+          time: formattedTime
+        })
+
+        //increment current time by 30 minutes 
+        currentDate.setMinutes(currentDate.getMinutes() + 30)
+      }
+      setDocSlots(prev => ([...prev, timeSlots]))
     }
   }
 
@@ -40,43 +66,54 @@ const Appointment = () => {
     fetchDocInfo()
   }, [doctors, docId])
 
-  useEffect(()=>{
-   getAvailableSlots()
-  },[docInfo])
+  useEffect(() => {
+    if (docInfo) {
+      getAvailableSlots()
+    }
+  }, [docInfo]) // Added docInfo dependency
+
+  useEffect(() => {
+    console.log(docSlots);
+  }, [docSlots])
 
   return docInfo && (
-    <div className='flex flex-col sm:flex-row gap-5'>
-      {/*-----------Doctor Image */}
-      <div>
-        <img className='bg-primary w-full sm:max-w-72 rounded-lg' src={docInfo.image} alt="" />
-      </div>
-      
-      {/*-----------Doctor Details */}
-      <div className='flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0'>
-        
-        {/* Doc Info : name, degree, experience */}
-        <p className='flex items-center gap-2 text-2xl font-medium text-gray-900'>
-          {docInfo.name}
-          <img className='w-5' src={assets.verified_icon} alt="" />
-        </p>
-
-        <div className='flex items-center gap-2 text-sm mt-1 text-gray-600'>
-          <p>{docInfo.degree} - {docInfo.speciality}</p>
-          <button className='py-0.5 px-2 border text-xs rounded-full'>{docInfo.experience}</button>
-        </div>
-
-        {/* Doctor About */}
+    <div>
+      <div className='flex flex-col sm:flex-row gap-5'>
+        {/*-----------Doctor Image */}
         <div>
-          <p className='flex items-center gap-1 text-sm font-medium text-gray-900 mt-3'>
-            About <img src={assets.info_icon} alt="" />
-          </p>
-          <p className='text-sm text-gray-500 max-w-[700px] mt-1'>{docInfo.about}</p>
+          <img className='bg-primary w-full sm:max-w-72 rounded-lg' src={docInfo.image} alt="" />
         </div>
+        
+        {/*-----------Doctor Details */}
+        <div className='flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0'>
+          
+          {/* Doc Info : name, degree, experience */}
+          <p className='flex items-center gap-2 text-2xl font-medium text-gray-900'>
+            {docInfo.name}
+            <img className='w-5' src={assets.verified_icon} alt="" />
+          </p>
 
-        <p className='text-sm font-medium text-gray-900 mt-4'>
-          Appointment fee: <span className='text-gray-600'>{currencySymbol}{docInfo.fees}</span>
-        </p>
+          <div className='flex items-center gap-2 text-sm mt-1 text-gray-600'>
+            <p>{docInfo.degree} - {docInfo.speciality}</p>
+            <button className='py-0.5 px-2 border text-xs rounded-full'>{docInfo.experience}</button>
+          </div>
+
+          {/* Doctor About */}
+          <div>
+            <p className='flex items-center gap-1 text-sm font-medium text-gray-900 mt-3'>
+              About <img src={assets.info_icon} alt="" />
+            </p>
+            <p className='text-sm text-gray-500 max-w-[700px] mt-1'>{docInfo.about}</p>
+          </div>
+
+          <p className='text-sm font-medium text-gray-900 mt-4'>
+            Appointment fee: <span className='text-gray-600'>{currencySymbol}{docInfo.fees}</span>
+          </p>
+        </div>
       </div>
+
+      {/* Booking Slots Section  */}
+      <div className=''></div>
     </div>
   )
 }
