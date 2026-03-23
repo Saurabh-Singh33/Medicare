@@ -1,28 +1,67 @@
-import React, { useState } from 'react'
-import { assets } from '../assets/assets'
+import React, { useState,useContext } from 'react'
+import {assets} from '../assets/assets'
+import axios from 'axios'
+ 
+ 
+import { AppContext } from '../context/AppContext'
+import { toast } from 'react-toastify'
+ 
 
 const MyProfile = () => {
 
-  const [userData, setUserData] = useState({
-    name: "Edward Vincent",
-    image: assets.profile_pic,
-    email: 'richardjameswap@gmail.com',
-    phone: '+1 123 456 7890',
-    address: {
-      line1: "57th Cross, Richmond ",
-      line2: "Circle, Church Road, London"
-    },
-    gender: 'Male',
-    dob: '2000-01-20'
-  })
+  const {userData,setUserData, token , backendUrl, loadUserProfileData} = useContext(AppContext)
 
   const [isEdit, setIsEdit] = useState(false)
+  const [image , setImage] = useState(false)
 
-  return (
+  const updateUserProfileData = async () =>{
+     try {
+      const formData = new FormData()
+
+      formData.append('name' , userData.name)
+      formData.append('phone' , userData.phone)
+      formData.append('address' , JSON.stringify(userData.address))
+      formData.append('gender' , userData.gender)
+      formData.append('dob' , userData.dob)
+
+
+      image && formData.append('image' , image)
+     
+      const {data} = await axios.post(backendUrl + '/api/user/update-profile',formData,{headers:{token}})
+
+      if (data.success) {
+        toast.success(data.message)
+      await  loadUserProfileData()
+      setIsEdit(false)
+      setImage(false)
+      }else{
+        toast.error(data.message)
+      }
+
+     } catch (error) {
+      console.log(error)
+      toast.error(error.message)
+     }
+  }
+
+  return  userData && (
     <div className='max-w-4xl mx-auto my-10 p-8 bg-white rounded-xl shadow-lg'>
       {/* Profile Header */}
       <div className='flex items-center gap-6 mb-8'>
-        <img src={userData.image} alt="Profile" className='w-24 h-24 rounded-full object-cover border-4 border-primary shadow-md' />
+        {
+          isEdit
+          ? <label htmlFor="image">
+           <div className='inline-block relative cursor-pointer'>
+
+            <img className='w-36 rounded opacity-75' src={image ? URL.createObjectURL(image): userData.image} alt="" />
+
+            <img className ='w-10 absolute bottom-12 right-12'   src={image  ? '' : assets.upload_icon} alt="" />
+           </div>
+           <input onChange={(e) =>setImage(e.target.files[0])} type="file" id='image' hidden/>
+          </label>
+          :<img src={userData.image} alt="Profile" className='w-24 h-24 rounded-full object-cover border-4 border-primary shadow-md' />
+        }
+        
         <div className='flex-1'>
           {isEdit 
             ? <input 
@@ -140,7 +179,7 @@ const MyProfile = () => {
       <div className='flex justify-end'>
         {isEdit 
           ? <button 
-              onClick={()=>setIsEdit(false)}
+              onClick={updateUserProfileData}
               className='bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-primary/90 hover:scale-105 hover:shadow-lg active:scale-95 transition-all duration-300 cursor-pointer'
             >
               Save information
