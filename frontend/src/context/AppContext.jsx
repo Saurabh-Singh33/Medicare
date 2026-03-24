@@ -48,7 +48,7 @@ const [userData , setUserData] = useState(false)
     }
 
      const value = {
-        doctors,
+        doctors,getDoctorsData,
          currencySymbol,token,setToken,backendUrl,userData,setUserData,loadUserProfileData
     }
 
