@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken'
 import { v2 as cloudinary } from 'cloudinary'
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
+import axios from 'axios'
+import crypto from 'crypto'
 
 // API to register user
 const registerUser = async (req, res) => {
@@ -257,4 +259,123 @@ const cancelAppointmnet = async (req, res) => {
     res.json({ success: false, message: error.message })
   }
 }
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment,listAppointment, cancelAppointmnet }
+
+ 
+
+const getPayPalAccessToken = async () => {
+  try {
+    const auth = Buffer.from(
+      `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`
+    ).toString('base64')
+    
+    const response = await axios.post(
+      `${process.env.PAYPAL_MODE === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'}/v1/oauth2/token`,
+      'grant_type=client_credentials',
+      {
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    )
+    
+    return response.data.access_token
+  } catch (error) {
+    console.error('Error getting PayPal token:', error.response?.data || error.message)
+    throw error
+  }
+}
+
+const paymentPaypal = async (req, res) => {
+  try {
+    const { appointmentId } = req.body
+    const appointmentData = await appointmentModel.findById(appointmentId)
+
+    if (!appointmentData || appointmentData.cancelled) {
+      return res.json({ success: false, message: "Appointment cancelled or not found" })
+    }
+
+    if (appointmentData.payment) {
+      return res.json({ success: false, message: "Payment already completed" })
+    }
+
+    const accessToken = await getPayPalAccessToken()
+
+    const orderResponse = await axios.post(
+      `${process.env.PAYPAL_MODE === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'}/v2/checkout/orders`,
+      {
+        intent: 'CAPTURE',
+        purchase_units: [
+          {
+            reference_id: appointmentId,
+            amount: {
+              currency_code: 'USD',
+              value: appointmentData.amount.toString()
+            },
+            description: `Appointment payment for Dr. ${appointmentData.docData.name}`
+          }
+        ],
+        application_context: {
+          return_url: `${process.env.FRONTEND_URL}/my-appointments`,
+          cancel_url: `${process.env.FRONTEND_URL}/my-appointments`
+        }
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    const approvalUrl = orderResponse.data.links.find(link => link.rel === 'approve').href
+
+    res.json({ 
+      success: true, 
+      orderId: orderResponse.data.id,
+      approvalUrl
+    })
+
+  } catch (error) {
+    console.log(error)
+    res.json({ success: false, message: error.response?.data?.message || error.message })
+  }
+}
+
+const capturePaypalPayment = async (req, res) => {
+  try {
+    const { orderId, appointmentId } = req.body
+    
+    const accessToken = await getPayPalAccessToken()
+    
+    const captureResponse = await axios.post(
+      `${process.env.PAYPAL_MODE === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'}/v2/checkout/orders/${orderId}/capture`,
+      {},
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+    
+    if (captureResponse.data.status === 'COMPLETED') {
+      await appointmentModel.findByIdAndUpdate(appointmentId, { 
+        payment: true,
+        paymentId: captureResponse.data.id
+      })
+      
+      res.json({ success: true, message: "Payment completed successfully" })
+    } else {
+      res.json({ success: false, message: "Payment not completed" })
+    }
+    
+  } catch (error) {
+    console.log(error)
+    res.json({ success: false, message: error.response?.data?.message || error.message })
+  }
+}
+    
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment,listAppointment, cancelAppointmnet,paymentPaypal,
+  capturePaypalPayment }
