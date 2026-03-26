@@ -63,7 +63,7 @@ const MyAppointments = () => {
       if (data.success) {
         if (!window.paypal) {
           const script = document.createElement('script')
-          script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=INR`
+          script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD`
           script.onload = () => {
             renderPayPalButton(data.orderId, appointmentId)
           }
