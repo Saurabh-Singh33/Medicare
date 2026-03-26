@@ -127,12 +127,16 @@ const updateProfile = async (req, res) => {
 }
 
 // API to book appointment 
-// ✅ Corrected - SAFE
-// API to book appointment
 const bookAppointment = async (req, res) => {
   try {
-    const { userId } = req.user;  // ✅ From token - SAFE
+    const { userId } = req.user;
     const { docId, slotDate, slotTime } = req.body;
+
+    
+
+    if (!slotTime) {
+      return res.json({ success: false, message: "Slot time is required" });
+    }
 
     // Get doctor data
     const docData = await doctorModel.findById(docId).select('-password');
@@ -161,7 +165,7 @@ const bookAppointment = async (req, res) => {
     // Get user data
     const userData = await userModel.findById(userId).select('-password');
 
-    // Create appointment data
+    // ✅ Create appointment data with COMPLETE docData including address
     const appointmentData = {
       userId,
       docId,
@@ -171,13 +175,16 @@ const bookAppointment = async (req, res) => {
         name: docData.name,
         speciality: docData.speciality,
         image: docData.image,
-        fees: docData.fees
+        fees: docData.fees,
+        address: docData.address  // ✅ Add address here!
       },
       amount: docData.fees,
-      slotTime,
-      slotDate,
+      slotTime,      // ✅ Make sure slotTime is included
+      slotDate,      // ✅ Make sure slotDate is included
       date: Date.now()
     };
+
+   
 
     // Save appointment
     const newAppointment = new appointmentModel(appointmentData);
@@ -193,7 +200,6 @@ const bookAppointment = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
-
 // API to get user appointment for frontend my-appointment-page
 
 const listAppointment =async(req,res)=>{
@@ -210,4 +216,45 @@ const listAppointment =async(req,res)=>{
     res.json({success:false,message:error.message})
   }
 }
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment,listAppointment }
+
+// API to cancel Appointment 
+
+// API to cancel Appointment 
+const cancelAppointmnet = async (req, res) => {
+  try {
+    const { userId } = req.user  // ✅ From token
+    const { appointmentId } = req.body  // ✅ From request body
+
+    // Find the appointment
+    const appointmentData = await appointmentModel.findById(appointmentId)
+
+    if (!appointmentData) {
+      return res.json({ success: false, message: "Appointment not found" })
+    }
+
+    // Verify appointment user
+    if (appointmentData.userId !== userId) {
+      return res.json({ success: false, message: 'Unauthorized Action' })
+    }
+
+    // Cancel the appointment
+    await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
+
+    // Release doctor slot
+    const { docId, slotDate, slotTime } = appointmentData
+    const doctorData = await doctorModel.findById(docId)
+
+    if (doctorData && doctorData.slots_booked && doctorData.slots_booked[slotDate]) {
+      let slots_booked = doctorData.slots_booked
+      slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+      await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+    }
+
+    res.json({ success: true, message: 'Appointment cancelled successfully' })
+
+  } catch (error) {
+    console.log(error)
+    res.json({ success: false, message: error.message })
+  }
+}
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment,listAppointment, cancelAppointmnet }
