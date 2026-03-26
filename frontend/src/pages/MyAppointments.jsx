@@ -24,6 +24,29 @@ const MyAppointments = () => {
     }
   }
 
+
+// for cancelling appointment
+// for cancelling appointment
+const cancelAppointment = async (appointmentId) => {
+  try {
+    const { data } = await axios.post(
+      backendUrl + '/api/user/cancel-appointment', 
+      { appointmentId },  // Send as appointmentId
+      { headers: { token } }  // ✅ Fixed headers syntax
+    )
+
+    if (data.success) {
+      toast.success(data.message)
+      getUserAppointments()
+    } else {
+      toast.error(data.message)
+    }
+  } catch (error) {
+    console.log(error)
+    toast.error(error.message)
+  }
+}
+
   useEffect(() => {
     if (token) {
       getUserAppointments()
@@ -69,7 +92,7 @@ const MyAppointments = () => {
               <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300">
                 Pay Online
               </button>
-              <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300">
+              <button  onClick={()=>cancelAppointment(item._id)}   className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300">
                 Cancel appointment
               </button>
             </div>
