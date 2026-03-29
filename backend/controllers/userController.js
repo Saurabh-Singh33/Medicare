@@ -292,13 +292,14 @@ const paymentPaypal = async (req, res) => {
     const appointmentData = await appointmentModel.findById(appointmentId)
 
     if (!appointmentData || appointmentData.cancelled) {
-      return res.json({ success: false, message: "Appointment cancelled or not found" })
+      return res.json({ success: false, message: "Appointment not available" })
     }
 
     if (appointmentData.payment) {
       return res.json({ success: false, message: "Payment already completed" })
     }
 
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
     const accessToken = await getPayPalAccessToken()
 
     const orderResponse = await axios.post(
@@ -309,15 +310,16 @@ const paymentPaypal = async (req, res) => {
           {
             reference_id: appointmentId,
             amount: {
-              currency_code: 'USD',
-              value: appointmentData.amount.toString()
+              currency_code: 'USD',  // ✅ Use USD (supported)
+              value: appointmentData.amount.toFixed(2)
             },
-            description: `Appointment payment for Dr. ${appointmentData.docData.name}`
+            description: `Appointment payment for Dr. ${appointmentData.docData?.name || 'Doctor'}`
           }
         ],
         application_context: {
-          return_url: `${process.env.FRONTEND_URL}/my-appointments`,
-          cancel_url: `${process.env.FRONTEND_URL}/my-appointments`
+          return_url: `${frontendUrl}/my-appointments`,
+          cancel_url: `${frontendUrl}/my-appointments`,
+          user_action: 'PAY_NOW'
         }
       },
       {
@@ -328,20 +330,19 @@ const paymentPaypal = async (req, res) => {
       }
     )
 
-    const approvalUrl = orderResponse.data.links.find(link => link.rel === 'approve').href
-
     res.json({ 
       success: true, 
-      orderId: orderResponse.data.id,
-      approvalUrl
+      orderId: orderResponse.data.id
     })
 
   } catch (error) {
-    console.log(error)
-    res.json({ success: false, message: error.response?.data?.message || error.message })
+    console.log('PayPal Error:', error.response?.data || error.message)
+    res.json({ 
+      success: false, 
+      message: error.response?.data?.message || "Payment initialization failed" 
+    })
   }
 }
-
 const capturePaypalPayment = async (req, res) => {
   try {
     const { orderId, appointmentId } = req.body
@@ -360,9 +361,9 @@ const capturePaypalPayment = async (req, res) => {
     )
     
     if (captureResponse.data.status === 'COMPLETED') {
+      // ✅ Just mark payment as true - no INR storage needed
       await appointmentModel.findByIdAndUpdate(appointmentId, { 
-        payment: true,
-        paymentId: captureResponse.data.id
+        payment: true
       })
       
       res.json({ success: true, message: "Payment completed successfully" })
