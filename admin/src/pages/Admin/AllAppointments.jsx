@@ -1,9 +1,11 @@
 import React, { useContext, useEffect } from 'react'
 import { AdminContext } from '../../context/AdminContext'
+import { AppContext } from '../../context/AppContext'
 
 const AllAppointments = () => {
 
   const { aToken, appointments, getAllAppointments } = useContext(AdminContext)
+  const {calculateAge,slotDateFormat} = useContext(AppContext)
 
   useEffect(() => {
     if (aToken) {
@@ -32,9 +34,19 @@ const AllAppointments = () => {
             <div className='flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr] items-center text-gray-500 py-3 px-6 border-b hover:bg-gray-50' key={index}>
               <p className='max-sm:hidden'>{index + 1}</p>
               <div className='flex items-center gap-2'>
-                <img className='w-8 rounded-full' src={item.userData.Image} alt="" />  {/*  Fixed: capital I */}
+                <img className='w-8 rounded-full' src={item.userData.Image} alt="" />
                 <p>{item.userData.name}</p>
               </div>
+
+              <p className='max-sm:hidden'>{calculateAge(item.userData.dob)}</p>
+
+              <p>{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
+
+              <div className='flex items-center gap-2'>
+                <img className='w-8 bg-gray-200 rounded-full' src={item.docData.image} alt="" />
+                <p>{item.docData.name}</p>
+              </div>
+              <p>{}</p>
             </div>
           )
         })}
