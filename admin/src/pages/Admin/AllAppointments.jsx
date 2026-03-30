@@ -5,7 +5,7 @@ import { AppContext } from '../../context/AppContext'
 const AllAppointments = () => {
 
   const { aToken, appointments, getAllAppointments } = useContext(AdminContext)
-  const {calculateAge,slotDateFormat} = useContext(AppContext)
+  const {calculateAge,slotDateFormat,currency} = useContext(AppContext)
 
   useEffect(() => {
     if (aToken) {
@@ -46,7 +46,7 @@ const AllAppointments = () => {
                 <img className='w-8 bg-gray-200 rounded-full' src={item.docData.image} alt="" />
                 <p>{item.docData.name}</p>
               </div>
-              <p>{}</p>
+              <p>{currency}{item.amount}</p>
             </div>
           )
         })}

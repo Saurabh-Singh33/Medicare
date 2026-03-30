@@ -6,7 +6,7 @@ const AppContextProvider = (props) =>{
 
   // Variable for currency 
    
-
+   const currency ='$'
 
   const calculateAge = (dob) =>{
    const today = new Date()
@@ -31,7 +31,7 @@ const slotDateFormat = (slotDate) => {
 }
 
   const value = {
-    calculateAge,slotDateFormat
+    calculateAge,slotDateFormat,currency
   }
   return (
     <AppContext.Provider value={value}>
