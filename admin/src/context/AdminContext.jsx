@@ -1,7 +1,7 @@
 import { createContext, useState } from "react";
 import axios from 'axios'
 import {toast} from 'react-toastify'
- //import { changeAvailabilty } from "../../../backend/controllers/doctorController"; 
+ 
 
 export const AdminContext = createContext();
 
