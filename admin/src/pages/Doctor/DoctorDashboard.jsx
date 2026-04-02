@@ -1,11 +1,11 @@
 import React from 'react'
 
-const DoctorsDashboard = () => {
+const DoctorDashboard = () => {
   return (
     <div>
-      
+      Doctor dashboard
     </div>
   )
 }
 
-export default DoctorsDashboard
+export default DoctorDashboard
