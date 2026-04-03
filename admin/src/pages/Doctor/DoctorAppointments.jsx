@@ -7,7 +7,9 @@ import { assets } from '../../assets/assets'
 
 const DoctorAppointments = () => {
 
-  const { dToken, appointments, getAppointments } = useContext(DoctorContext)
+  const { dToken, appointments, getAppointments, completeAppointment, cancelAppointment } = useContext(DoctorContext)
+
+
   const { calculateAge, slotDateFormat, currency } = useContext(AppContext)
 
   useEffect(() => {
@@ -52,16 +54,19 @@ const DoctorAppointments = () => {
             <p className='text-gray-700 font-semibold'>{currency} {item.amount}</p>
 
             <div className='flex items-center gap-3'>
-              <img 
-                className='w-7 h-7 cursor-pointer hover:scale-110 transition-transform duration-200' 
-                src={assets.tick_icon} 
-                alt="complete" 
-              />
-              <img 
+
+              <img onClick={()=>cancelAppointment(item._id)}
                 className='w-7 h-7 cursor-pointer hover:scale-110 transition-transform duration-200' 
                 src={assets.cancel_icon} 
                 alt="cancel" 
               />
+
+              <img  onClick={()=>completeAppointment(item._id)}
+                className='w-7 h-7 cursor-pointer hover:scale-110 transition-transform duration-200' 
+                src={assets.tick_icon} 
+                alt="complete" 
+              />
+               
             </div>
           </div>
         ))}
