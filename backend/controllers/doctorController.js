@@ -110,4 +110,39 @@ const appointementCancel = async (req, res) => {
   }
 }
 
-export { changeAvailability, doctorList, loginDoctor, appointmentsDoctor, appointementComplete, appointementCancel }
+
+const doctorDashboard = async (req, res) => {
+  try {
+    const { docId } = req.doctor  // ✅ Correct
+
+    const appointments = await appointmentModel.find({ docId })  // ✅ Correct
+
+    let earnings = 0
+    appointments.map((item) => {
+      if (item.isCompleted || item.payment) {  // ✅ Correct
+        earnings += item.amount
+      }
+    })
+
+    let patients = []
+    appointments.map((item) => {
+      if (!patients.includes(item.userId)) {  // ✅ Correct
+        patients.push(item.userId)
+      }
+    })
+
+    const dashData = {
+      earnings,
+      appointments: appointments.length,
+      patients: patients.length,
+      latestAppointments: appointments.reverse().slice(0, 5)  // ✅ Correct
+    }
+
+    res.json({ success: true, dashData })  // ✅ Correct
+  } catch (error) {
+    console.log(error)
+    res.json({ success: false, message: error.message })  // ✅ Correct
+  }
+}
+
+export { changeAvailability, doctorList, loginDoctor, appointmentsDoctor, appointementComplete, appointementCancel, doctorDashboard }
