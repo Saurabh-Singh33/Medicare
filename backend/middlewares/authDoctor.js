@@ -1,8 +1,5 @@
 import jwt from "jsonwebtoken";
 
-// This middleware is used to authenticate doctors by verifying the JWT token provided in the request headers.
- 
-
 const authDoctor = async (req, res, next) => {
   try {
     const { dtoken } = req.headers;
@@ -15,9 +12,7 @@ const authDoctor = async (req, res, next) => {
     }
 
     const token_decode = jwt.verify(dtoken, process.env.JWT_SECRET);
-    
-    // ✅ Fix: Use req.doctor instead of req.body
-    req.doctor = { docId: token_decode.id }
+    req.doctor = { docId: token_decode.id }  // ✅ Set req.doctor
     
     next();
     
@@ -26,7 +21,5 @@ const authDoctor = async (req, res, next) => {
     res.json({ success: false, message: error.message });
   }
 };
-
- 
 
 export default authDoctor;
