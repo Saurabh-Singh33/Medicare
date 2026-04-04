@@ -7,7 +7,7 @@ import { AppContext } from '../../context/AppContext'
 
 const DoctorDashboard = () => {
 
-  const { dToken, getDashData, dashData, setDashData, completeAppointment, cancelAppointment } = useContext(DoctorContext)
+  const { dToken, getDashData, dashData, completeAppointment, cancelAppointment } = useContext(DoctorContext)
   const { currency, slotDateFormat } = useContext(AppContext)
 
   useEffect(() => {
@@ -23,13 +23,13 @@ const DoctorDashboard = () => {
   // Handle complete appointment
   const handleComplete = async (appointmentId) => {
     await completeAppointment(appointmentId)
-    getDashData() // Refresh dashboard data
+    await getDashData() // Refresh dashboard data
   }
 
   // Handle cancel appointment
   const handleCancel = async (appointmentId) => {
     await cancelAppointment(appointmentId)
-    getDashData() // Refresh dashboard data
+    await getDashData() // Refresh dashboard data
   }
 
   return (
@@ -77,41 +77,51 @@ const DoctorDashboard = () => {
         </div>
 
         <div>
-          {dashData.latestAppointments?.map((item, index) => (
-            <div key={index} className="flex items-center justify-between px-6 py-3 border-b last:border-b-0 hover:bg-gray-50 transition-all duration-200">
-              <div className="flex items-center gap-3">
-                <img className="w-10 h-10 rounded-full object-cover" src={item.userData?.Image} alt="" />
-                <div>
-                  <p className="text-gray-800 font-medium">{item.userData?.name}</p>
-                  <p className="text-gray-500 text-sm">{slotDateFormat(item.slotDate)} | {item.slotTime}</p>
+          {dashData.latestAppointments?.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No appointments found
+            </div>
+          ) : (
+            dashData.latestAppointments?.map((item, index) => (
+              <div key={item._id || index} className="flex items-center justify-between px-6 py-3 border-b last:border-b-0 hover:bg-gray-50 transition-all duration-200">
+                <div className="flex items-center gap-3">
+                  <img 
+                    className="w-10 h-10 rounded-full object-cover" 
+                    src={item.userData?.Image || assets.profile_pic} 
+                    alt="" 
+                  />
+                  <div>
+                    <p className="text-gray-800 font-medium">{item.userData?.name}</p>
+                    <p className="text-gray-500 text-sm">{slotDateFormat(item.slotDate)} | {item.slotTime}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!item.cancelled && !item.isCompleted && (
+                    <>
+                      <button
+                        onClick={() => handleComplete(item._id)}
+                        className="text-green-500 text-xs font-medium bg-green-50 px-3 py-1 rounded-full hover:bg-green-100 hover:scale-105 transition-all duration-200 cursor-pointer"
+                      >
+                        Complete
+                      </button>
+                      <button
+                        onClick={() => handleCancel(item._id)}
+                        className="text-red-500 text-xs font-medium bg-red-50 px-3 py-1 rounded-full hover:bg-red-100 hover:scale-105 transition-all duration-200 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                  {item.cancelled && (
+                    <span className="text-red-500 text-xs font-medium bg-red-50 px-3 py-1 rounded-full">Cancelled</span>
+                  )}
+                  {!item.cancelled && item.isCompleted && (
+                    <span className="text-green-500 text-xs font-medium bg-green-50 px-3 py-1 rounded-full">Completed</span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {!item.cancelled && !item.isCompleted && (
-                  <>
-                    <button
-                      onClick={() => handleComplete(item._id)}
-                      className="text-green-500 text-xs font-medium bg-green-50 px-3 py-1 rounded-full hover:bg-green-100 hover:scale-105 transition-all duration-200 cursor-pointer"
-                    >
-                      Complete
-                    </button>
-                    <button
-                      onClick={() => handleCancel(item._id)}
-                      className="text-red-500 text-xs font-medium bg-red-50 px-3 py-1 rounded-full hover:bg-red-100 hover:scale-105 transition-all duration-200 cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                )}
-                {item.cancelled && (
-                  <span className="text-red-500 text-xs font-medium bg-red-50 px-3 py-1 rounded-full">Cancelled</span>
-                )}
-                {!item.cancelled && item.isCompleted && (
-                  <span className="text-green-500 text-xs font-medium bg-green-50 px-3 py-1 rounded-full">Completed</span>
-                )}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
