@@ -5,7 +5,8 @@ import { AppContext } from "../../context/AppContext";
 import { assets } from "../../assets/assets.js";
 
 const Dashboard = () => {
-  const { aToken, dashData, getDashData, cancelAppointment } = useContext(AdminContext);
+  const { aToken, dashData, getDashData, cancelAppointment } =
+    useContext(AdminContext);
   const { slotDateFormat } = useContext(AppContext);
 
   useEffect(() => {
@@ -57,25 +58,42 @@ const Dashboard = () => {
 
           <div className="pt-4 border border-t-0">
             {dashData.latestAppointments.map((item, index) => (
-              <div className="flex items-center justify-between px-6 py-3 hover:bg-gray-100" key={index}>
+              <div
+                className="flex items-center justify-between px-6 py-3 hover:bg-gray-100"
+                key={index}
+              >
                 <div className="flex items-center gap-3">
-                  <img className="rounded-full w-10" src={item.docData.image} alt="" />
+                  <img
+                    className="rounded-full w-10"
+                    src={item.docData.image}
+                    alt=""
+                  />
                   <div>
-                    <p className="text-gray-800 font-medium">{item.docData.name}</p>
-                    <p className="text-gray-600 text-sm">{slotDateFormat(item.slotDate)}</p>
+                    <p className="text-gray-800 font-medium">
+                      {item.docData.name}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      {slotDateFormat(item.slotDate)}
+                    </p>
                   </div>
                 </div>
 
                 {item.cancelled ? (
                   <p className="text-red-400 text-xs font-medium">Cancelled</p>
+                ) : item.isCompleted ? (
+                  <p className="text-green-500 text-xs font-medium">
+                    {" "}
+                    Completed
+                  </p>
                 ) : (
                   <img
                     onClick={() => cancelAppointment(item._id)}
-                    className="w-8 cursor-pointer hover:scale-110 transition-transform"
+                    className="w-10 cursor-pointer"
                     src={assets.cancel_icon}
                     alt=""
                   />
                 )}
+                
               </div>
             ))}
           </div>
