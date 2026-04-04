@@ -175,17 +175,17 @@ const doctorProfile = async (req, res) => {
   }
 };
 
-//API to update Doctor Profile form Doctor Panel
-
+// ✅ Correct - get docId from req.doctor, data from req.body
 const updateDoctorProfile = async (req, res) => {
   try {
-    const { docId, fees, address, available } = req.doctor; // ✅ Get docId from auth middleware
-
-    await doctorModel.findByIdAndUpdate(docId, { fees, address, available }); // ✅ Update doctor profile
-    res.json({ success: true, message: "Profile updated successfully" }); // ✅ Success response
+    const { docId } = req.doctor;  // Doctor ID from auth token
+    const { fees, address, available } = req.body;  // Data from frontend
+    
+    await doctorModel.findByIdAndUpdate(docId, { fees, address, available });
+    res.json({ success: true, message: "Profile updated successfully" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message }); // ✅ Correct
+    res.json({ success: false, message: error.message });
   }
 };
 
