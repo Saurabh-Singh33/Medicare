@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createContext } from "react";
 import axios from "axios";
 import {toast} from 'react-toastify'
-import { set } from "mongoose";
+ 
 
 export const DoctorContext = createContext();
 
@@ -97,8 +97,8 @@ const DoctorContextProvider = (props) => {
     
 const { data } = await axios.get(backendUrl + '/api/doctor/profile', {headers: { dToken }});
 if(data.success){
- setProfileData(data.profileData)
- console.log(data.profileData)
+ setProfileData(data.doctorData)
+ console.log(data.doctorData)
 }else{
  toast.error(data.message)
 }
