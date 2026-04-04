@@ -165,12 +165,13 @@ const doctorDashboard = async (req, res) => {
 
 const doctorProfile = async (req, res) => {
   try {
-    const { docId } = req.doctor; // ✅ Get docId from auth middleware
-    const doctorData = await doctorModel.findById(docId).select("-password"); // ✅ Exclude password
-    res.json({ success: true, doctorData }); // ✅ Return doctor data
+    const { docId } = req.doctor;
+    const doctorData = await doctorModel.findById(docId).select("-password");
+    
+    res.json({ success: true, doctorData });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message }); // ✅ Correct
+    res.json({ success: false, message: error.message });
   }
 };
 
