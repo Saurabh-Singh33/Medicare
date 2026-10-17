@@ -20,32 +20,38 @@ const AllAppointments = () => {
 
       <div className='bg-white border rounded text-sm max-h-[80vh] min-h-[60vh] overflow-y-scroll'>
 
-        <div className='hidden sm:grid grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr] grid-flow-col py-3 px-6 border-b'>
+        <div className='hidden sm:grid grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr] grid-flow-col py-3 px-6 border-b bg-gray-50 font-medium'>
           <p>#</p>
           <p>Patient</p>
           <p>Age</p>
-          <p>Data & Time</p>
+          <p>Date & Time</p>
           <p>Doctor</p>
           <p>Fees</p>
           <p>Actions</p>
         </div>
 
-        {appointments.map((item, index) => {
+        {[...appointments]
+          .sort((a, b) => {
+            if (b.date && a.date) return b.date - a.date
+            if (b._id && a._id) return String(b._id).localeCompare(String(a._id))
+            return 0
+          })
+          .map((item, index) => {
           return (
-            <div className='flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr] items-center text-gray-500 py-3 px-6 border-b hover:bg-gray-50' key={index}>
+            <div className='flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr] items-center text-gray-500 py-3 px-6 border-b hover:bg-gray-50' key={item._id || index}>
               <p className='max-sm:hidden'>{index + 1}</p>
               <div className='flex items-center gap-2'>
-                <img className='w-8 rounded-full' src={item.userData.Image} alt="" />
-                <p>{item.userData.name}</p>
+                <img className='w-8 h-8 rounded-full object-cover' src={item.userData?.image || item.userData?.Image || assets.profile_pic} onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }} alt="" />
+                <p>{item.userData?.name}</p>
               </div>
 
-              <p className='max-sm:hidden'>{calculateAge(item.userData.dob)}</p>
+              <p className='max-sm:hidden'>{calculateAge(item.userData?.dob)}</p>
 
               <p>{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
 
               <div className='flex items-center gap-2'>
-                <img className='w-8 bg-gray-200 rounded-full' src={item.docData.image} alt="" />
-                <p>{item.docData.name}</p>
+                <img className='w-8 h-8 bg-gray-200 rounded-full object-cover' src={item.docData?.image} alt="" />
+                <p>{item.docData?.name}</p>
               </div>
               <p>{currency}{item.amount}</p>
 

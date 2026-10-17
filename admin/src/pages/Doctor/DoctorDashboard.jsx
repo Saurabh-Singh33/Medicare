@@ -87,7 +87,8 @@ const DoctorDashboard = () => {
                 <div className="flex items-center gap-3">
                   <img 
                     className="w-10 h-10 rounded-full object-cover" 
-                    src={item.userData?.Image || assets.profile_pic} 
+                    src={item.userData?.image || item.userData?.Image || assets.profile_pic} 
+                    onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
                     alt="" 
                   />
                   <div>

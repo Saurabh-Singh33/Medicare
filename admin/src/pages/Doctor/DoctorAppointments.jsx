@@ -32,13 +32,19 @@ const DoctorAppointments = () => {
           <p className='text-gray-600 font-medium'>Action</p>
         </div>
 
-        {appointments.reverse().map((item, index) => (
-          <div key={index} className='flex flex-wrap justify-between max-sm:gap-5 max-sm:text-base sm:grid sm:grid-cols-[0.5fr_2fr_1fr_1fr_3fr_1fr_1fr] items-center py-3 px-6 border-b hover:bg-gray-50 transition-all duration-300'>
+        {[...appointments]
+          .sort((a, b) => {
+            if (b.date && a.date) return b.date - a.date
+            if (b._id && a._id) return String(b._id).localeCompare(String(a._id))
+            return 0
+          })
+          .map((item, index) => (
+          <div key={item._id || index} className='flex flex-wrap justify-between max-sm:gap-5 max-sm:text-base sm:grid sm:grid-cols-[0.5fr_2fr_1fr_1fr_3fr_1fr_1fr] items-center py-3 px-6 border-b hover:bg-gray-50 transition-all duration-300'>
             <p className='max-sm:hidden text-gray-500'>{index + 1}</p>
 
             <div className='flex items-center gap-3'>
-              <img className='w-10 h-10 rounded-full object-cover' src={item.userData.Image} alt="" />
-              <p className='text-gray-700 font-medium'>{item.userData.name}</p>
+              <img className='w-10 h-10 rounded-full object-cover' src={item.userData?.image || item.userData?.Image || assets.profile_pic} onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }} alt="" />
+              <p className='text-gray-700 font-medium'>{item.userData?.name}</p>
             </div>
 
             <div>
