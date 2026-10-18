@@ -15,7 +15,7 @@ const Contact = () => {
           <p className='font-semibold text-lg text-gray-800'>Our OFFICE</p>
           <p className='text-gray-600'>54709 Willms Station<br/>Suite 350, Washington, USA</p>
           <p className='text-gray-600'>Tel: (415) 555-0132<br/>Email: greatstackdev@gmail.com</p>
-          <p className='font-semibold text-lg text-gray-800'>Careers at PRESCRIPTO</p>
+          <p className='font-semibold text-lg text-gray-800'>Careers at MEDICARE</p>
           <p className='text-gray-600'>Learn more about our teams and job openings.</p>
           <button className='bg-primary text-white px-8 py-3 rounded-full hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer'>
             Explore Jobs

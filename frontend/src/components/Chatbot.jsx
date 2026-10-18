@@ -1,8 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import styles from './Chatbot.module.css';
-
-const API_KEY = "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";
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+import { AppContext } from '../context/AppContext';
 
 const SendIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
@@ -21,9 +19,10 @@ const BotIcon = () => (
 );
 
 export default function Chatbot() {
+  const { backendUrl } = useContext(AppContext);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { text: "Hello! I'm your Medicare assistant. How can I help you with your health appointments today?", sender: 'bot' }
+    { text: "Hello! I'm your Medicare medical assistant. How can I assist you with your health symptoms, medical inquiries, or doctor appointments today?", sender: 'bot' }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,36 +42,42 @@ export default function Chatbot() {
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage = inputValue.trim();
-    setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
+    const currentMessages = [...messages, { text: userMessage, sender: 'user' }];
+    setMessages(currentMessages);
     setInputValue('');
     setIsLoading(true);
 
     try {
-      const response = await fetch(API_URL, {
+      const apiUrl = (backendUrl || "http://localhost:4000") + "/api/user/chat";
+      
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`,
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "Prescripto Health",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
-          messages: [{ role: "user", content: userMessage }],
+          message: userMessage,
+          messages: currentMessages,
+          role: 'user'
         }),
       });
 
       const data = await response.json();
       
-      if (data.choices && data.choices[0]) {
-        const reply = data.choices[0].message.content;
-        setMessages(prev => [...prev, { text: reply, sender: 'bot' }]);
+      if (data.success && data.reply) {
+        setMessages(prev => [...prev, { text: data.reply, sender: 'bot' }]);
       } else {
-        setMessages(prev => [...prev, { text: "Sorry, I couldn't understand that. Please try again.", sender: 'bot' }]);
+        setMessages(prev => [...prev, { 
+          text: data.message || "I apologize, but I could not process your medical inquiry right now. Please try again.", 
+          sender: 'bot' 
+        }]);
       }
     } catch (error) {
       console.error("Chatbot Error:", error);
-      setMessages(prev => [...prev, { text: "Sorry, there was an error connecting to the health assistant. Please try again later.", sender: 'bot' }]);
+      setMessages(prev => [...prev, { 
+        text: "Sorry, there was an issue connecting to Medicare medical assistant. Please ensure the backend server is running and try again.", 
+        sender: 'bot' 
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +96,10 @@ export default function Chatbot() {
         <div className={styles.chatHeader}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <BotIcon />
-            <h2>Medicare Assistant</h2>
+            <div>
+              <h2>Medicare Assistant</h2>
+              <span style={{ fontSize: '11px', opacity: 0.85 }}>Medical & Healthcare Queries Only</span>
+            </div>
           </div>
           <button onClick={toggleChat} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', padding: '5px' }}>
             <CloseIcon />
@@ -106,7 +114,7 @@ export default function Chatbot() {
           ))}
           {isLoading && (
             <div className={`${styles.message} ${styles.botMessage}`}>
-              <div className={styles.loading}>Thinking...</div>
+              <div className={styles.loading}>Thinking & reviewing medical guidelines...</div>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -118,7 +126,7 @@ export default function Chatbot() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Write a message..."
+            placeholder="Ask a medical or health question..."
             disabled={isLoading}
           />
           <button onClick={handleSendMessage} className={styles.sendButton} disabled={isLoading}>

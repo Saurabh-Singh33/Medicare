@@ -19,10 +19,10 @@ const MyProfile = () => {
       const formData = new FormData()
 
       formData.append('name' , userData.name)
-      formData.append('phone' , userData.phone)
-      formData.append('address' , JSON.stringify(userData.address))
-      formData.append('gender' , userData.gender)
-      formData.append('dob' , userData.dob)
+      formData.append('phone' , userData.phone || '')
+      formData.append('address' , JSON.stringify(userData.address || { line1: '', line2: '' }))
+      formData.append('gender' , userData.gender || 'Not Selected')
+      formData.append('dob' , userData.dob || 'Not Selected')
 
 
       image && formData.append('image' , image)
@@ -51,15 +51,25 @@ const MyProfile = () => {
         {
           isEdit
           ? <label htmlFor="image">
-           <div className='inline-block relative cursor-pointer'>
-
-            <img className='w-36 rounded opacity-75' src={image ? URL.createObjectURL(image): userData.image} alt="" />
-
-            <img className ='w-10 absolute bottom-12 right-12'   src={image  ? '' : assets.upload_icon} alt="" />
+           <div className='inline-block relative cursor-pointer group'>
+            <img 
+              className='w-32 h-32 rounded-full object-cover opacity-80 border-4 border-primary shadow-md transition-all duration-300 group-hover:opacity-60' 
+              src={image ? URL.createObjectURL(image) : (userData.image || userData.Image || assets.profile_pic)} 
+              onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
+              alt="Profile" 
+            />
+            <div className='w-9 h-9 absolute bottom-1 right-1 bg-primary text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-transform group-hover:scale-110'>
+              <img className='w-4 h-4 filter invert' src={assets.upload_icon} alt="Upload" />
+            </div>
            </div>
-           <input onChange={(e) =>setImage(e.target.files[0])} type="file" id='image' hidden/>
+           <input onChange={(e) => setImage(e.target.files[0])} type="file" id='image' hidden accept="image/*" />
           </label>
-          :<img src={userData.image} alt="Profile" className='w-24 h-24 rounded-full object-cover border-4 border-primary shadow-md' />
+          : <img 
+              src={userData.image || userData.Image || assets.profile_pic} 
+              onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
+              alt="Profile" 
+              className='w-28 h-28 rounded-full object-cover border-4 border-primary shadow-md' 
+            />
         }
         
         <div className='flex-1'>
@@ -110,24 +120,24 @@ const MyProfile = () => {
               {isEdit
                 ? <div className='space-y-2'>
                     <input 
-                      onChange={(e)=>setUserData(prev=>({...prev, address: {...prev.address, line1: e.target.value}}))}  
-                      value={userData.address.line1} 
+                      onChange={(e)=>setUserData(prev=>({...prev, address: { ...(typeof prev?.address === 'object' && prev?.address ? prev.address : {}), line1: e.target.value}}))}  
+                      value={userData.address?.line1 || ''} 
                       type="text" 
                       className='border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300'
                       placeholder="Address line 1"
                     />
                     <input 
                       type="text"
-                      onChange={(e)=>setUserData(prev=>({...prev, address: {...prev.address, line2: e.target.value}}))}  
-                      value={userData.address.line2} 
+                      onChange={(e)=>setUserData(prev=>({...prev, address: { ...(typeof prev?.address === 'object' && prev?.address ? prev.address : {}), line2: e.target.value}}))}  
+                      value={userData.address?.line2 || ''} 
                       className='border border-gray-300 rounded-lg px-3 py-2 w-full focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300'
                       placeholder="Address line 2"
                     />
                   </div>
                 : <p className='text-gray-800'>
-                    {userData.address.line1}
+                    {userData.address?.line1 || ''}
                     <br />
-                    {userData.address.line2}
+                    {userData.address?.line2 || ''}
                   </p>
               }
             </div>

@@ -3,6 +3,7 @@ import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 
 
 const Login = () => {
@@ -15,6 +16,7 @@ const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [name, setName] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
 
     const onSubmitHandler = async (event) => {
         event.preventDefault()
@@ -83,13 +85,27 @@ const Login = () => {
 
                 <div className='w-full animate-fadeIn animation-delay-300'>
                     <p className='font-medium'>Password</p>
-                    <input 
-                        className='border border-zinc-300 rounded w-full p-2 mt-1 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300 hover:border-primary' 
-                        type="password" 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        value={password} 
-                        required 
-                    />
+                    <div className='relative w-full mt-1'>
+                        <input 
+                            className='border border-zinc-300 rounded w-full p-2 pr-10 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300 hover:border-primary' 
+                            type={showPassword ? "text" : "password"} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            value={password} 
+                            required 
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className='absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 focus:outline-none cursor-pointer p-1 rounded transition-colors flex items-center justify-center'
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                            {showPassword ? (
+                                <EyeOff className='w-4 h-4 text-zinc-500 hover:text-primary transition-colors' />
+                            ) : (
+                                <Eye className='w-4 h-4 text-zinc-500 hover:text-primary transition-colors' />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 <button 
@@ -106,46 +122,6 @@ const Login = () => {
                     }
                 </div>
             </div>
-
-            <style jsx>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                
-                @keyframes slideDown {
-                    from { opacity: 0; transform: translateY(-20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                
-                .animate-fadeIn {
-                    animation: fadeIn 0.5s ease-out forwards;
-                }
-                
-                .animate-slideDown {
-                    animation: slideDown 0.4s ease-out forwards;
-                }
-                
-                .animation-delay-100 {
-                    animation-delay: 0.1s;
-                }
-                
-                .animation-delay-200 {
-                    animation-delay: 0.2s;
-                }
-                
-                .animation-delay-300 {
-                    animation-delay: 0.3s;
-                }
-                
-                .animation-delay-400 {
-                    animation-delay: 0.4s;
-                }
-                
-                .animation-delay-500 {
-                    animation-delay: 0.5s;
-                }
-            `}</style>
         </form>
     )
 }
