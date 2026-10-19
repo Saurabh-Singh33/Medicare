@@ -61,7 +61,7 @@ const changeAvailability = async (req, res) => {
 const appointmentsDoctor = async (req, res) => {
   try {
     const { docId } = req.doctor; // ✅ Get from req.doctor (auth middleware)
-    const appointments = await appointmentModel.find({ docId });
+    const appointments = await appointmentModel.find({ docId }).sort({ date: -1, _id: -1 });
     res.json({ success: true, appointments });
   } catch (error) {
     console.log(error);
