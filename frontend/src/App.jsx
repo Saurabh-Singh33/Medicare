@@ -9,6 +9,7 @@ import MyAppointments from "./pages/MyAppointments";
 import Appointment from "./pages/Appointment";
 import Navbar from "./components/Navbar";
 import MyProfile from "./pages/MyProfile";
+import DoctorChat from "./pages/DoctorChat";
 import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
 import {ToastContainer , toast} from 'react-toastify';
@@ -33,7 +34,9 @@ const App = () => {
 
         <Route path="/my-appointments" element={<MyAppointments />} />
 
-        
+        {/* Real-time 1-to-1 Patient-Doctor Chat */}
+        <Route path="/messages" element={<DoctorChat />} />
+        <Route path="/messages/:docId" element={<DoctorChat />} />
 
         <Route path="appointment/:docId" element={<Appointment />} />
 

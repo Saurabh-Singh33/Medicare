@@ -45,6 +45,16 @@ const logout = () =>{
           <li className="py-1">CONTACT</li>
           <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto  hidden'/>
         </NavLink>
+
+        {token && (
+          <NavLink to='/messages'>
+            <li className="py-1 flex items-center gap-1.5 text-primary font-semibold">
+              MESSAGES
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            </li>
+            <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden'/>
+          </NavLink>
+        )}
       </ul>
 
       <div className="flex item-center gap-4">
@@ -55,11 +65,16 @@ const logout = () =>{
             <img  className='w-2.5 'src={assets.dropdown_icon} alt="" />
 
             <div className="absolute top-0 right-0 pt-14 text-base font-medium text-grey-600 z-20 hidden group-hover:block "> 
-              <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">
+              <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4 shadow-lg border border-gray-200">
                 
                 <p onClick={()=>navigate('my-profile')}className='hover:text-black cursor-pointer'>My Profile</p>
 
                 <p onClick={()=>navigate('my-appointments')}className='hover:text-black cursor-pointer'>My Appointments</p>
+
+                <p onClick={()=>navigate('messages')}className='hover:text-black cursor-pointer flex items-center justify-between text-primary font-medium'>
+                  <span>Doctor Chat</span>
+                  <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold">Live</span>
+                </p>
 
                 <p onClick={logout}className='hover:text-black cursor-pointer'>Logout</p>
 
@@ -90,6 +105,9 @@ const logout = () =>{
             <NavLink   onClick= {()=>setShowMemu(false)} to= '/'> <p className= 'px-4 py-2 rounded inline-block'>HOME</p></NavLink>
 
             <NavLink   onClick= {()=>setShowMemu(false)} to= '/doctors'> <p className= 'px-4 py-2 rounded inline-block'>ALL DOCTORS</p></NavLink>
+            {token && (
+              <NavLink   onClick= {()=>setShowMemu(false)} to= '/messages'> <p className= 'px-4 py-2 rounded inline-block text-primary font-bold'>MESSAGES</p></NavLink>
+            )}
             <NavLink   onClick= {()=>setShowMemu(false)}  to= '/about'> <p className= 'px-4 py-2 rounded inline-block'>ABOUT</p></NavLink>
             <NavLink   onClick= {()=>setShowMemu(false)} to= '/contact'> <p  className= 'px-4 py-2 rounded inline-block'>CONTACT</p></NavLink>
           </ul>

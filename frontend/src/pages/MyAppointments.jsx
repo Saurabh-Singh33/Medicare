@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
 const MyAppointments = () => {
+  const navigate = useNavigate()
   const { backendUrl, token, getDoctorsData, userData } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [payingId, setPayingId] = useState(null)
@@ -228,6 +230,18 @@ const MyAppointments = () => {
                 <div className="sm:min-w-48 py-2.5 border border-green-500 rounded-lg text-green-500 bg-green-50 text-center text-sm font-medium">
                   Completed
                 </div>
+              )}
+
+              {!item.cancelled && (
+                <button 
+                  onClick={() => navigate(`/messages/${item.docId}`)}
+                  className="text-sm text-primary bg-primary/10 hover:bg-primary hover:text-white border border-primary/30 text-center sm:min-w-48 py-2.5 rounded-lg transition-all duration-300 font-medium flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-95"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span>Chat with Doctor</span>
+                </button>
               )}
 
               {!item.cancelled && !item.payment && !item.isCompleted && (
